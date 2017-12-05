@@ -23,8 +23,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 // POSSIBILITY OF SUCH DAMAGE
 "use strict";
-require("monaco-loader")().then(function() {    
-    
+
+require("monaco-loader")().then(function() {
+
     require('bootstrap');
     require('bootstrap-slider');
 
@@ -50,7 +51,6 @@ require("monaco-loader")().then(function() {
     require("goldenlayout/src/css/goldenlayout-base.css")
     require("selectize/dist/css/selectize.bootstrap2.css");
     require("bootstrap-slider/dist/css/bootstrap-slider.css");
-
 
     function setupSettings(eventHub) {
         var currentSettings = JSON.parse(local.get('settings', '{}'));

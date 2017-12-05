@@ -22,8 +22,9 @@ case language
 meta(name="author" content="Matt Godbolt")
 meta(name="google" content="nositelinkssearchbox")
 meta(name="google" content="notranslate")
-link(href=root + "dist/styles.css" rel="stylesheet")
+link(href=builtResourcesRoot + "dist/styles.css" rel="stylesheet")
 style#theme
 link(href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet")
 script window.compilerExplorerOptions = !{compilerExplorerOptions}
-script(src=root + "dist/bundle.js")
+
+script(src=builtResourcesRoot + "dist/bundle.js")

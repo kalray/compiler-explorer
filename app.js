@@ -38,8 +38,14 @@ const nopt = require('nopt'),
     _ = require('underscore-node'),
     utils = require('./lib/utils'),
     express = require('express'),
-    logger = require('./lib/logger').logger,
     Raven = require('raven');
+    logger = require('./lib/logger').logger,
+    logger = require('./lib/logger').logger,
+    Raven = require('raven'),
+    webpackDevMiddleware = require("webpack-dev-middleware");
+    
+const config = require('./webpack.config.js'),
+    compiler = require('webpack')(config);
 
 // Parse arguments from command line 'node ./app.js args...'
 var opts = nopt({
@@ -82,6 +88,7 @@ var staticDir = opts.static || 'static';
 var archivedVersions = opts.archivedVersions;
 var gitReleaseName = "";
 var versionedRootPrefix = "";
+var builtResourcesRoot = versionedRootPrefix;
 // Use the canned git_hash if provided
 if (opts.static && fs.existsSync(opts.static + "/git_hash")) {
     gitReleaseName = fs.readFileSync(opts.static + "/git_hash").toString().trim();
@@ -90,6 +97,10 @@ if (opts.static && fs.existsSync(opts.static + "/git_hash")) {
 }
 if (opts.static && fs.existsSync(opts.static + '/v/' + gitReleaseName))
     versionedRootPrefix = "v/" + gitReleaseName + "/";
+
+if(process.env.NODE_ENV == "DEV") {
+    builtResourcesRoot = "static/";
+}
 // Don't treat @ in paths as remote adresses
 var fetchCompilersFromRemote = !opts.noRemoteFetch;
 
@@ -582,6 +593,7 @@ Promise.all([findCompilers(), aws.initConfig(awsProps)])
             }, rescanCompilerSecs * 1000);
         }
 
+
         var webServer = express(),
             sFavicon = require('serve-favicon'),
             bodyParser = require('body-parser'),
@@ -599,6 +611,7 @@ Promise.all([findCompilers(), aws.initConfig(awsProps)])
             options.compilerExplorerOptions = JSON.stringify(options);
             options.root = versionedRootPrefix;
             options.extraBodyClass = extraBodyClass;
+            options.builtResourcesRoot = builtResourcesRoot;
             return options;
         }
 
@@ -606,6 +619,20 @@ Promise.all([findCompilers(), aws.initConfig(awsProps)])
             staticHeaders(res);
             res.render('embed', renderConfig({embedded: true}));
         };
+        
+        
+        if(process.env.NODE_ENV == "DEV") {
+            webServer.use(webpackDevMiddleware(compiler, {
+                publicPath: config.output.publicPath
+            }));
+            webServer.use(express.static(staticDir));
+        } else {
+               //assume that anything not dev is just production this gives sane defaults for anyone who isn't messing with this
+            webServer.use(express.static(staticDir, {maxAge: staticMaxAgeSecs * 1000}));
+            webServer.use('/v', express.static(staticDir + '/v', {maxAge: Infinity, index: false}));
+        }
+
+        
         webServer
             .use(Raven.requestHandler())
             .set('trust proxy', true)
@@ -632,9 +659,8 @@ Promise.all([findCompilers(), aws.initConfig(awsProps)])
                 res.set('Content-Type', 'application/xml');
                 res.render('sitemap');
             })
-            .use(sFavicon(staticDir + '/favicon.ico'))
-            .use('/v', express.static(staticDir + '/v', {maxAge: Infinity, index: false}))
-            .use(express.static(staticDir, {maxAge: staticMaxAgeSecs * 1000}));
+            .use(sFavicon(staticDir + '/favicon.ico'));
+            
         if (archivedVersions) {
             // The archived versions directory is used to serve "old" versioned data during updates. It's expected
             // to contain all the SHA-hashed directories from previous versions of Compiler Explorer.
