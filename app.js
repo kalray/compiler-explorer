@@ -40,13 +40,10 @@ const nopt = require('nopt'),
     express = require('express'),
     Raven = require('raven');
     logger = require('./lib/logger').logger,
-    logger = require('./lib/logger').logger,
-    Raven = require('raven'),
     webpackDevMiddleware = require("webpack-dev-middleware");
     
 const config = require('./webpack.config.js'),
     compiler = require('webpack')(config);
-
 // Parse arguments from command line 'node ./app.js args...'
 var opts = nopt({
     'env': [String, Array],
