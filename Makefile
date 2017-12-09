@@ -63,7 +63,7 @@ webpack:
 
 lint: $(NODE_MODULES)
 	$(NODE) ./node_modules/.bin/jshint --config etc/jshintrc.server app.js $(shell find lib -name '*.js')
-	$(NODE) ./node_modules/.bin/jshint --config etc/jshintrc.client $(shell find static -name '*.js' -not -path 'static/ext/*' -not -path static/analytics.js)
+	$(NODE) ./node_modules/.bin/jshint --config etc/jshintrc.client $(shell find static -name '*.js' -not -path 'static/dist/*' -not -path static/analytics.js -not -path 'static/vs/*')
 
 LANG:=C++
 
