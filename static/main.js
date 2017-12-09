@@ -45,12 +45,12 @@ require("monaco-loader")().then(function() {
     var themer = require('./themes');
 
     //css
-    require("./colours.css");
-    require("./explorer.css");
     require("bootstrap/dist/css/bootstrap.min.css");
     require("goldenlayout/src/css/goldenlayout-base.css")
     require("selectize/dist/css/selectize.bootstrap2.css");
     require("bootstrap-slider/dist/css/bootstrap-slider.css");
+    require("./explorer.css");
+    require("./colours.css");
 
     function setupSettings(eventHub) {
         var currentSettings = JSON.parse(local.get('settings', '{}'));
